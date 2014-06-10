@@ -2,17 +2,18 @@ path = require 'path'
 fs = require 'fs'
 
 ResourceType = require('../lib/resource-manager').ResourceType
-DefaultOptions = require('../lib/resource-manager').DefaultOptions
+ResourceOptions = require('../lib/resource-manager').ResourceOptions
 ResourceManager = require('../lib/resource-manager').ResourceManager
 
-### Html
-DefaultOptions.phyPath = path.join process.cwd(), 'html'
-DefaultOptions.key.platform = "apple"
-DefaultOptions.key.subPlatform = "_null"
-DefaultOptions.key.lang = "en"
-DefaultOptions.key.resourceType = ResourceType.OVERRIDE
-rm = new ResourceManager DefaultOptions
-###
+# Html
+options = new ResourceOptions();
+options.phyPath = path.join process.cwd(), 'html'
+options.key.platform = "apple"
+options.key.subPlatform = "_null"
+options.key.lang = "en"
+options.key.resourceType = ResourceType.OVERRIDE
+rm = new ResourceManager options
+
 
 
 ### CSS
@@ -42,23 +43,28 @@ rm = new ResourceManager DefaultOptions
 DefaultOptions.phyPath = path.join process.cwd(), 'properties'
 DefaultOptions.key.platform = "apple"
 DefaultOptions.key.subPlatform = "_null"
-DefaultOptions.key.country = "CN"
+DefaultOptions.key.country = "US"
 DefaultOptions.key.resourceType = ResourceType.PROPERTIES
+DefaultOptions.key.flag = "countryConfig"
 DefaultOptions.rules = [
-  'country/_default/',
-  'country/{country}/'
+  'country/_default',
+  'country/{country}'
 ]
+
+console.log "Phy Path: ", DefaultOptions.phyPath
 rm = new ResourceManager DefaultOptions
+
+DefaultOptions.phyPath = path.join process.cwd(), 'properties'
+DefaultOptions.key.platform = "apple"
+DefaultOptions.key.subPlatform = "_null"
+DefaultOptions.key.country = "US"
+DefaultOptions.key.resourceType = ResourceType.PROPERTIES
+DefaultOptions.key.flag = "env"
+DefaultOptions.rules = [
+  'env/dev'
+]
+
+console.log "Phy Path: ", DefaultOptions.phyPath
+rm = new ResourceManager DefaultOptions
+
 ###
-
-data = fs.readFileSync('config.properties')
-#data = fs.readFileSync('kk.txt')
-console.log typeof(data)
-console.log data.toString()
-
-lines = data.toString().split('\r\n');
-
-for l,i in lines
-  console.log i, l
-
-

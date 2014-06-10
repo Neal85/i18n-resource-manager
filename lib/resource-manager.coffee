@@ -4,15 +4,21 @@ fs = require 'fs'
 Utils = require './utils'
 
 ResourceType = {
-  "OVERRIDE": 0,
-  "APPEND": 1,
-  "PROPERTIES": 2
+  "OVERRIDE": "Override",
+  "APPEND": "Append",
+  "PROPERTIES": "Properties"
 }
 
-DefaultOptions = {
-  key: { platform: "_null", subPlatform: "_null", country: "US", resourceType: ResourceType.OVERRIDE },
-  phyPath: process.cwd(),
-  rules: [
+ResourceOptions= ()->
+  this.key = {
+    platform: '_null',
+    subPlatform: '_null',
+    country: 'US',
+    flag: '_null',
+    resourceType: ResourceType.OVERRIDE
+  }
+  this.phyPath = process.cwd()
+  this.rules = [
     '_default/country/_default',
     '_default/country/{country}',
     '_default/{subPlatform}/country/_default',
@@ -22,19 +28,31 @@ DefaultOptions = {
     '{platform}/{subPlatform}/country/_default',
     '{platform}/{subPlatform}/country/{country}'
   ]
-}
-
+  return this
 
 class ResourceManager
+  RESOURCE_KEY: "localization-resource"
   constructor: (@options)->
-    @resourceUtils = new ResourceUtils(@options)
+    @resourceUtils = new ResourceUtils()
+    @options.rules = @resourceUtils.resolveRules @options
+    @indexKey = @resourceUtils.resolveKey @options.key
+    rulesCache = @resourceUtils.buildRules @options
+
+    resource = global[this.RESOURCE_KEY] = {}
+    resource[@indexKey] = rulesCache
+
+  ###
+    1: {filename} get files
+    2: {filename, key} get properties
+  ###
+  get:()->
+
+
+
+
+
 
 class ResourceUtils
-  constructor: (@options)->
-    @options = Utils.FillObject DefaultOptions, @options, "full"
-    @options.rules = this.resolveRules @options
-    this.buildRules()
-
   # Resolver Rules
   resolveRules: (opts)->
     results = new Array()
@@ -50,14 +68,21 @@ class ResourceUtils
 
     return results
 
-  # Build Rules
-  buildRules:()->
-    if @options.key.resourceType is ResourceType.OVERRIDE or @options.key.resourceType is ResourceType.APPEND
-      console.log this.buildFilesByRules(@options)
-    else if @options.key.resourceType is ResourceType.PROPERTIES
-      @options.key.resourceType = ResourceType.APPEND
-      console.log this.buildFilesByRules(@options)
+  resolveKey: (key)->
+    result = ""
+    for p of key
+      if result isnt "" then result += "-"
+      result += key[p]
 
+    return result
+
+  # Build Rules
+  buildRules:(options)->
+    if options.key.resourceType is ResourceType.OVERRIDE or options.key.resourceType is ResourceType.APPEND
+      return this.buildFilesByRules(options)
+    else if @options.key.resourceType is ResourceType.PROPERTIES
+      filesDic = this.buildFilesByRules(options)
+      return this.buildProperties(options, filesDic)
     else
       throw new Error('Resource type invalid! Please check your options.resourceType.')
 
@@ -82,52 +107,75 @@ class ResourceUtils
       fStat = fs.statSync itemPhyPath
       if fStat.isFile()
         if typeof(files[fName.toLowerCase()]) isnt "undefined"
-          if opts.key.resourceType is ResourceType.APPEND
+          if opts.key.resourceType is ResourceType.OVERRIDE
+            files[fName.toLowerCase()] = itemRelativePath
+          else
             isExists = item for item in files[fName.toLowerCase()] when item is itemRelativePath
             if(!isExists) then files[fName.toLowerCase()].push(itemRelativePath)
-          else
-            files[fName.toLowerCase()] = itemRelativePath
+
         else
-          if opts.key.resourceType is ResourceType.APPEND
-            files[fName.toLowerCase()] = [itemRelativePath]
-          else
+          if opts.key.resourceType is ResourceType.OVERRIDE
             files[fName.toLowerCase()] = itemRelativePath
+          else
+            files[fName.toLowerCase()] = [itemRelativePath]
+
       else if fStat.isDirectory()
         if fs.existsSync(folderPath) then this.buildFilesByDirectory opts, files, itemPhyPath, itemRelativePath, fName
 
-  buildProperties: (filesDic)->
+  buildProperties: (opts, filesDic)->
     result = {}
     for filename of filesDic
       files = filesDic[filename]
 
-      if path.extname(filename).toLowerCase() is "json"
-        result[filename] = this.handleJSONFile files
+      if path.extname(filename).toLowerCase() is ".json"
+        result[filename] = this.JSONFilesParse files, opts.phyPath
       else
-        result[filename] = this.handlePropertyFile files
+        result[filename] = this.propertyFilesParse files, opts.phyPath
 
     return result
 
-  handleJSONFile: (files)->
+  JSONFilesParse: (files, phyPath)->
     result = null
     for f in files
-      data = fs.ReadFileSync(f, {encoding: "utf8"});
+      data = fs.readFileSync path.join(phyPath, f), {encoding: "utf8"}
       obj = JSON.parse data
-      if result is null then result = obj else result = Utils.FillObject(result, obj, "full")
+      result = if result is null then obj else Utils.FillObject(result, obj, "full")
 
     return result
 
+  propertyFilesParse: (files, phyPath)->
+    result = null
+    for f in files
+      data = fs.readFileSync path.join(phyPath, f), {encoding: "utf8"}
+      fileObj = this.propertyFileToJSON(data)
+      result = if result is null then fileObj else Utils.FillObject result, fileObj, "full"
 
-  handlePropertyFile: (files)->
+    return result
 
+  propertyFileToJSON: (fileData)->
+    result = {}
+    lineArr = fileData.toString().split('\r\n')
+    for line in lineArr
+      line = line.trim()
+      if line[0] is "#" then continue
+      if line.indexOf('=') is -1 then continue
 
+      kv = line.split('=')
+      key = kv[0].trim()
+      value = kv[1].trim()
 
+      if key.indexOf('.') is -1
+        result[key] = value
+      else
+        keyArr = key.split('.')
+        c = result;
+        for subKey,i in keyArr
+          if subKey.trim() is "" then continue
+          if typeof(c[subKey]) is "undefined" then c[subKey] = {}
+          if i+1 is keyArr.length then c[subKey] = value else c = c[subKey]
 
-
-
-
-
-
+      return result
 
 exports.ResourceType = ResourceType
-exports.DefaultOptions = DefaultOptions
+exports.ResourceOptions = ResourceOptions
 exports.ResourceManager = ResourceManager
