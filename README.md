@@ -1,81 +1,102 @@
 i18n-resource-manager
 =====================
 
-nodejs localization strategy solution
+Localization strategy solution on node. Support all languages.
 
-### Data in RAM ####
-Data:
+Scenario
+---------------------
+1. different platforms
+2. different countries
+3. different configurations
 
-    global.LocalResource = {
-      "apple-IPhone-en_US": {
-         "Single": {
-            "index.html": "./apple/IPhone/country/US/index.html",
-            "about.html": "./apple/IPhone/country/_default/about.html"
-         },
-         "Multi": {
-            "style.css": [
-                "./_default/locale/_default/style.css",
-                "./_default/locale/en/style.css",
-                "./apple/locale/en/style.css",
-                "./apple/IPhone/locale/en/style.css",
-             ]
-         },
-         "Properties-country": {
-            "config.properties": {
-                "key1": "value1 from ./_default/country/_default/config.properties",
-                "key2": "value2 from ./apple/IPhone/country/US/config.properties"
-            }
-         },
-         "Properties-env": {
-            "env.properties": {
-                "key1": "value1 from ./_default/env/dev/env.properties",
-                "key2": "value2 from ./apple/IPhone/env/dev/env.properties"
-            }
-         }
-      }
-    }
+Directory Structure
+---------------------
+Directory:
 
-Options:
+    root
+    | views (Override)
+        | _default/country/_default
+            | index.html
+            | public.html
+            | specific.html
+        | _default/country/US
+            | specific.html
+        | platform/country/_default
+            | index.html
+        | platform/country/US
+            | specific.html   
+            
+    | css (Append)
+        | _default/lang/_default
+            | style.css        
+        | platform/lang/en
+            | style.css
+            | US/style.css
+            
+    | properties (Override specific config item)
+        | country/default
+            | config.json
+            | language.properties        
+        | country/CN
+            | config.json
+            | language.properties
+    
+Results:
 
-    {
-        key: { platform: "apple", subPlatform: "IPhone", locale: "en_US"},
-        phyPath: process.cwd(),
-        rules: [
-           '_default/country/_default',
-           '_default/country/{country}',
-           '_default/{subTarget}/country/_default',
-           '_default/{subTarget}/country/{country}',
-           '{target}/country/_default',
-           '{target}/country/{country}',
-           '{target}/{subTarget}/country/_default',
-           '{target}/{subTarget}/country/{country}'
-        ],
-        isOnlyLeafFiles: false or true,  // file in en not only US folder
-        isMultifile: false or true,  // html or css
-        isProperties: false or true
-    }
+    views ---------------------
+       { 'index.html': 'platform\\country\\_default\\index.html',
+         'public.html': '_default\\country\\_default\\public.html',
+         'specific.html': 'platform\\country\\US\\specific.html'}
+    
+    css ------------------------
+         { 'style.css': [ 
+             '_default\\lang\\_default\\style.css',
+             'platform\\lang\\en\\style.css',
+             'platform\\lang\\en\\US\\style.css']}
+             
+    properties ------------------
+         { 'config.json': { item: 'CN config', version: '0.0.1', extend: 'CN specific config' },
+           'language.properties': { button: { save: '保存' } } }
 
-html
-{platform}/{subPlatform}/country/US/file
-css
-{platform}/{subPlatform}/country/en/file
-{platform}/{subPlatform}/country/en/US/file
+Usage
+------------------
 
-properties group 1
-{platform}/{subPlatform}/country/_default/properties
-{platform}/{subPlatform}/country/en/properties
-{platform}/{subPlatform}/country/en/US/properties
+    options = new ResourceOptions();
+    options.phyPath = path.join process.cwd(), 'views'
+    options.key.platform = "platform"
+    options.key.subPlatform = "null"
+    options.key.country = "US"
+    options.key.flag = "HTML"
+    options.key.resourceType = ResourceType.OVERRIDE
+    options.rules = [
+      '_default/country/_default',
+      '_default/country/{country}',
+      '_default/{subPlatform}/country/_default',
+      '_default/{subPlatform}/country/{country}',
+      '{platform}/country/_default',
+      '{platform}/country/{country}',
+      '{platform}/{subPlatform}/country/_default',
+      '{platform}/{subPlatform}/country/{country}'
+    ]
+    
+    htmlResource = new ResourceManager options
+    console.log 'HTML ----------------------------'
+    console.log 'index.html:', htmlResource.get('index.html')
+    console.log 'specific.html:', htmlResource.get('specific.html')
+    console.log 'END HTML ------------------------'
+    
+    OUTPUT:
+    index.html: platform\country\_default\index.html
+    specific.html: platform\country\US\specific.html
+    
 
-[folder]:folder-properties-key
-{platform}/{subPlatform}/country/en/US/folder/properties
+Code using coffescript, you can look the js file.
 
-properties group 2
-{platform}/{subPlatform}/countryLang/_default/properties
-{platform}/{subPlatform}/countryLang/US/properties
-
-properties group 3
-{platform}/{subPlatform}/env/_default/properties
-{platform}/{subPlatform}/env/{dev or prod}/properties
-
-properties group 4
-{platform}/{subPlatform}/noloc/properties
+### ResourceOptions
+  * I have the sames default field, but you should be set your field according to your rules, and add the somes field, javascript allows that.
+  * such as:
+  
+        options.key.lang = "en"
+   
+    the lang is a new field, no in the ResourceOptions object
+  * more skills, please see /test/index.coffe or index.js

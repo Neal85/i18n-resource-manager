@@ -1,3 +1,10 @@
+###
+@author      Created by Haiwei Li <haiwei8086@gmail.com> on 2014-6-8.
+@link        https://github.com/haiwei8086/i18n-resource-manager
+@license     http://opensource.org/licenses/MIT
+@version     0.0.1
+###
+
 
 path = require 'path'
 fs = require 'fs'
@@ -11,10 +18,10 @@ ResourceType = {
 
 ResourceOptions= ()->
   this.key = {
-    platform: '_null',
-    subPlatform: '_null',
-    country: 'US',
-    flag: '_null',
+    platform: '_default',
+    subPlatform: '_default',
+    country: '_default',
+    flag: 'null',
     resourceType: ResourceType.OVERRIDE
   }
   this.phyPath = process.cwd()
@@ -42,18 +49,33 @@ class ResourceManager
     resource[@indexKey] = rulesCache
 
   ###
-    1: {filename} get files
-    2: {filename, key} get properties
+  Arguments:
+  1: (filename) /index.html
+  2: (folder..., filename) /part/view.html or /part/view/template.html
   ###
   get:()->
+    key = ""
+    prefix = ""
+    if arguments.length > 1
+      for item,i in arguments
+        if i+1 is arguments.length then break
+        prefix+=item+"-"
 
+    if arguments.length > 0 then key = prefix+arguments[arguments.length - 1] else return null
 
+    return global[this.RESOURCE_KEY][@indexKey]?[key]
 
+  # get data from cache, use debug
+  getCache: ()->
+    return global[this.RESOURCE_KEY][@indexKey]
 
+  getIndexKey: ()->
+    return @indexKey
 
+  getOptions: ()->
+    return @options
 
 class ResourceUtils
-  # Resolver Rules
   resolveRules: (opts)->
     results = new Array()
     key = opts.key
@@ -76,11 +98,10 @@ class ResourceUtils
 
     return result
 
-  # Build Rules
   buildRules:(options)->
     if options.key.resourceType is ResourceType.OVERRIDE or options.key.resourceType is ResourceType.APPEND
       return this.buildFilesByRules(options)
-    else if @options.key.resourceType is ResourceType.PROPERTIES
+    else if options.key.resourceType is ResourceType.PROPERTIES
       filesDic = this.buildFilesByRules(options)
       return this.buildProperties(options, filesDic)
     else

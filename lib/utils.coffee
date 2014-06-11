@@ -1,3 +1,9 @@
+###
+@author      Created by Haiwei Li <haiwei8086@gmail.com> on 2014-6-8.
+@link        https://github.com/haiwei8086/i18n-resource-manager
+@license     http://opensource.org/licenses/MIT
+@version     0.0.1
+###
 
 Utils =
   # Deep Clone
