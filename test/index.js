@@ -112,6 +112,19 @@
 
   console.log('language.properties save:', (_ref = configResource.get('language.properties').button) != null ? _ref.save : void 0);
 
+  if (configResource.getIndexKey() === configResource.buildIndexKey(configOptions)) {
+    console.log("Can't re-build resource ");
+  } else {
+    console.log("no index key in the resource, need re-build");
+    configResource.reBuild();
+  }
+
+  configOptions.key.country = "US";
+
+  if (configResource.getIndexKey() === configResource.buildIndexKey(configOptions)) {
+    configResource.reBuild();
+  }
+
   console.log('END Config ------------------------');
 
   envOptions = new ResourceOptions();

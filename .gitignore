@@ -1,0 +1,40 @@
+# Hidden files
+.*
+!.gitignore
+
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+
+# IDE Files
+*.iws
+*.iml
+*.ipr
+
+# python execute Files
+*.pyc
+
+# Node modules
+**/node_modules/**
+node_modules/
+
+
+# tmux log
+tmux-*.log
+
+# log file
+*.log
+*.log
+
+# btm log
+*.tlog
+
+# activemq log
+**/activemq-data/**
+activemq-data/
+
+# ignore diff orig file
+*.orig
+

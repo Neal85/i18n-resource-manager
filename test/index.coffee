@@ -90,6 +90,17 @@ console.log 'Cache: \n', configResource.getCache()
 console.log "OUTPUT *******************"
 console.log 'config.json item:', configResource.get('config.json').item
 console.log 'language.properties save:', configResource.get('language.properties').button?.save
+
+if configResource.getIndexKey() is configResource.buildIndexKey(configOptions)
+  console.log "Can't re-build resource "
+else
+  console.log "no index key in the resource, need re-build"
+  configResource.reBuild()
+
+configOptions.key.country = "US"
+if configResource.getIndexKey() is configResource.buildIndexKey(configOptions)
+  configResource.reBuild()
+
 console.log 'END Config ------------------------'
 
 # ENV ============================================================

@@ -5,7 +5,6 @@
 @version     0.0.1
 ###
 
-
 path = require 'path'
 fs = require 'fs'
 Utils = require './utils'
@@ -43,10 +42,11 @@ class ResourceManager
     @resourceUtils = new ResourceUtils()
     @options.rules = @resourceUtils.resolveRules @options
     @indexKey = @resourceUtils.resolveKey @options.key
-    rulesCache = @resourceUtils.buildRules @options
 
-    resource = global[this.RESOURCE_KEY] = {}
-    resource[@indexKey] = rulesCache
+    if global[this.RESOURCE_KEY] is undefined or global[this.RESOURCE_KEY][@indexKey] is undefined
+      rulesCache = @resourceUtils.buildRules @options
+      resource = global[this.RESOURCE_KEY] = {}
+      resource[@indexKey] = rulesCache
 
   ###
   Arguments:
@@ -74,6 +74,15 @@ class ResourceManager
 
   getOptions: ()->
     return @options
+
+  buildIndexKey: (options)->
+    return @resourceUtils.resolveKey(options.key)
+
+  # always build resource
+  reBuild: ()->
+    rulesCache = @resourceUtils.buildRules @options
+    resource = global[this.RESOURCE_KEY] = {}
+    resource[@indexKey] = rulesCache
 
 class ResourceUtils
   resolveRules: (opts)->
