@@ -89,6 +89,7 @@ console.log 'Cache: \n', configResource.getCache()
 
 console.log "OUTPUT *******************"
 console.log 'config.json item:', configResource.get('config.json').item
+console.log 'language.properties key:', configResource.get('language.properties').key
 console.log 'language.properties save:', configResource.get('language.properties').button?.save
 
 if configResource.getIndexKey() is configResource.buildIndexKey(configOptions)

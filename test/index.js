@@ -110,6 +110,8 @@
 
   console.log('config.json item:', configResource.get('config.json').item);
 
+  console.log('language.properties key:', configResource.get('language.properties').key);
+
   console.log('language.properties save:', (_ref = configResource.get('language.properties').button) != null ? _ref.save : void 0);
 
   if (configResource.getIndexKey() === configResource.buildIndexKey(configOptions)) {

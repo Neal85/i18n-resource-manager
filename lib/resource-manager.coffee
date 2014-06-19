@@ -190,9 +190,9 @@ class ResourceUtils
       if line[0] is "#" then continue
       if line.indexOf('=') is -1 then continue
 
-      kv = line.split('=')
-      key = kv[0].trim()
-      value = kv[1].trim()
+      symbolIndex = line.indexOf('=')
+      key = line.substr(0, symbolIndex).trim()
+      value = line.slice(symbolIndex+1).trim()
 
       if key.indexOf('.') is -1
         result[key] = value
@@ -204,7 +204,7 @@ class ResourceUtils
           if typeof(c[subKey]) is "undefined" then c[subKey] = {}
           if i+1 is keyArr.length then c[subKey] = value else c = c[subKey]
 
-      return result
+    return result
 
 exports.ResourceType = ResourceType
 exports.ResourceOptions = ResourceOptions
