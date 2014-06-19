@@ -1,6 +1,6 @@
 {
   "name": "i18n-resource-manager",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Localization strategy solution on node. Support all languages.",
   "main": "index.js",
   "scripts": {
