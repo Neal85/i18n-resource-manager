@@ -5,9 +5,10 @@ ResourceType = require('../index').ResourceType
 ResourceOptions = require('../index').ResourceOptions
 ResourceManager = require('../index').ResourceManager
 
+
 # Html ============================================================
 options = new ResourceOptions();
-options.phyPath = path.join process.cwd(), 'html'
+options.phyPath = path.join __dirname, 'html'
 options.key.platform = "platform"
 options.key.subPlatform = "null"
 options.key.country = "US"
@@ -25,19 +26,20 @@ options.rules = [
 ]
 
 htmlResource = new ResourceManager options
-console.log 'HTML ----------------------------'
+console.log 'HTML ==============================================================='
 console.log 'IndexKey: \n', htmlResource.getIndexKey()
 console.log 'Cache: \n', htmlResource.getCache()
 
-console.log "OUTPUT *******************"
+console.log "OUTPUT -------------------------------------------------------------"
 console.log 'index.html:', htmlResource.get('index.html')
 console.log 'specific.html:', htmlResource.get('specific.html')
 console.log 'future.html:', htmlResource.get('module','specific','future.html')
-console.log 'END HTML ------------------------'
+console.log 'future.html:', htmlResource.get('/module/specific/future.html')
+console.log 'END HTML ==========================================================='
 
 # CSS ============================================================
 cssOptions = new ResourceOptions();
-cssOptions.phyPath = path.join process.cwd(), 'css'
+cssOptions.phyPath = path.join __dirname, 'css'
 cssOptions.key.platform = "platform"
 cssOptions.key.subPlatform = "null"
 cssOptions.key.lang = "en"
@@ -59,20 +61,54 @@ cssOptions.rules = [
   '{platform}/{subPlatform}/lang/{lang}/{country}'
 ]
 styleResource = new ResourceManager cssOptions
-console.log 'CSS ----------------------------'
+console.log 'CSS ==============================================================='
 console.log 'IndexKey: \n', styleResource.getIndexKey()
 console.log 'Cache: \n', styleResource.getCache()
 
-console.log "OUTPUT *******************"
+console.log "OUTPUT ------------------------------------------------------------"
 console.log 'style.css:', styleResource.get('style.css')
 console.log 'apple.css:', styleResource.get('apple.css')
 console.log 'module.css:', styleResource.get('module','module.css')
-console.log 'END CSS ------------------------'
+console.log 'END CSS ==============================================================='
+
+# Properties ============================================================
+propertiesOptions = new ResourceOptions();
+propertiesOptions.phyPath = path.join __dirname, 'properties'
+propertiesOptions.key.platform = "_default"
+propertiesOptions.key.subPlatform = "null"
+propertiesOptions.key.lang = "en"
+propertiesOptions.key.country = "US"
+propertiesOptions.key.flag = "CSS"
+propertiesOptions.key.resourceType = ResourceType.PROPERTIES
+propertiesOptions.rules = [
+  '_default/_default/_default',
+  '_default/_default/{country}',
+  '_default/{lang}/_default',
+  '_default/{lang}/{country}',
+  '{platform}/_default/_default',
+  '{platform}/_default/{country}',
+  '{platform}/{lang}/_default',
+  '{platform}/{lang}/{country}',
+  '_default/{subPlatform}/_default/_default',
+  '_default/{subPlatform}/_default/{country}',
+  '_default/{subPlatform}/{lang}/_default',
+  '_default/{subPlatform}/{lang}/{country}'
+]
+propertiesResource = new ResourceManager propertiesOptions
+console.log 'Properties ==============================================================='
+console.log 'IndexKey: \n', propertiesResource.getIndexKey()
+console.log 'Cache: \n', propertiesResource.getCache()
+
+console.log "OUTPUT -------------------------------------------------------------------"
+console.log 'any.any:', propertiesResource.get('any.any').any_suffix
+console.log 'package.json:', propertiesResource.get('package.json').title
+console.log 'property.p:', propertiesResource.get('property.p').file.key
+console.log 'END CSS ==============================================================='
 
 
 # Config ============================================================
 configOptions = new ResourceOptions();
-configOptions.phyPath = path.join process.cwd(), 'properties'
+configOptions.phyPath = path.join __dirname, 'config'
 configOptions.key.platform = "null"
 configOptions.key.subPlatform = "null"
 configOptions.key.country = "CN"
@@ -83,11 +119,11 @@ configOptions.rules = [
   'country/{country}'
 ]
 configResource = new ResourceManager configOptions
-console.log 'Config ----------------------------'
+console.log 'Config ==============================================================='
 console.log 'IndexKey: \n', configResource.getIndexKey()
 console.log 'Cache: \n', configResource.getCache()
 
-console.log "OUTPUT *******************"
+console.log "OUTPUT ---------------------------------------------------------------"
 console.log 'config.json item:', configResource.get('config.json').item
 console.log 'language.properties key:', configResource.get('language.properties').key
 console.log 'language.properties save:', configResource.get('language.properties').button?.save
@@ -102,11 +138,11 @@ configOptions.key.country = "US"
 if configResource.getIndexKey() is configResource.buildIndexKey(configOptions)
   configResource.reBuild()
 
-console.log 'END Config ------------------------'
+console.log 'END Config ==============================================================='
 
 # ENV ============================================================
 envOptions = new ResourceOptions();
-envOptions.phyPath = path.join process.cwd(), 'properties'
+envOptions.phyPath = path.join __dirname, 'config'
 envOptions.key.resourceType = ResourceType.PROPERTIES
 envOptions.key.env = "prod"
 envOptions.key.flag = "env"
@@ -114,27 +150,27 @@ envOptions.rules = [
   'env/{env}'
 ]
 envResource = new ResourceManager envOptions
-console.log 'ENV ----------------------------'
+console.log 'ENV ==============================================================='
 console.log 'IndexKey: \n', envResource.getIndexKey()
 console.log 'Cache: \n', envResource.getCache()
 
-console.log "OUTPUT *******************"
+console.log "OUTPUT ------------------------------------------------------------"
 console.log 'config.properties env.name:', envResource.get('config.properties').env?.name
-console.log 'END ENV ------------------------'
+console.log 'END ENV ==============================================================='
 
 # no locale ============================================================
 nOptions = new ResourceOptions();
-nOptions.phyPath = path.join process.cwd(), 'properties'
+nOptions.phyPath = path.join __dirname, 'config'
 nOptions.key.resourceType = ResourceType.PROPERTIES
 nOptions.key.flag = "nolocale"
 nOptions.rules = [
   'nolocale/'
 ]
 nResource = new ResourceManager nOptions
-console.log 'No Locale ----------------------------'
+console.log 'No Locale ==============================================================='
 console.log 'IndexKey: \n', nResource.getIndexKey()
 console.log 'Cache: \n', nResource.getCache()
 
-console.log "OUTPUT *******************"
+console.log "OUTPUT -------------------------------------------------------------------"
 console.log 'config.properties namespace.item:', nResource.get('config.properties').namespace?.item
-console.log 'END No Locale ------------------------'
+console.log 'END No Locale ==============================================================='

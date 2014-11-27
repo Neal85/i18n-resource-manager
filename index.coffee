@@ -1,4 +1,3 @@
-
 Resource = require('./lib/resource-manager')
 
 exports.ResourceType = Resource.ResourceType

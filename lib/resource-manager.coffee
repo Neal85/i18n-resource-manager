@@ -37,31 +37,41 @@ ResourceOptions= ()->
   return this
 
 class ResourceManager
-  RESOURCE_KEY: "localization-resource"
+  RESOURCE_KEY: "__localization_manager"
   constructor: (@options)->
     @resourceUtils = new ResourceUtils()
     @options.rules = @resourceUtils.resolveRules @options
     @indexKey = @resourceUtils.resolveKey @options.key
 
     if global[this.RESOURCE_KEY] is undefined or global[this.RESOURCE_KEY][@indexKey] is undefined
+      if !global[this.RESOURCE_KEY]
+        global[this.RESOURCE_KEY] = {}
+
       rulesCache = @resourceUtils.buildRules @options
-      resource = global[this.RESOURCE_KEY] = {}
+      resource = global[this.RESOURCE_KEY]
       resource[@indexKey] = rulesCache
 
   ###
   Arguments:
-  1: (filename) /index.html
+  1: (filename) /index.html or folder/folder/index.html
   2: (folder..., filename) /part/view.html or /part/view/template.html
   ###
   get:()->
     key = ""
     prefix = ""
     if arguments.length > 1
-      for item,i in arguments
-        if i+1 is arguments.length then break
-        prefix+=item+"-"
+      for item, i in arguments
+        if i + 1 is arguments.length then break
+        prefix += item + "-"
 
-    if arguments.length > 0 then key = prefix+arguments[arguments.length - 1] else return null
+    if arguments.length > 0
+      filePath = arguments[arguments.length - 1]
+      if filePath.indexOf('/') is 0
+        filePath = filePath.substr(1, filePath.length - 1)
+
+      key = prefix + filePath.replace(/\//g, '-')
+    else
+      return null
 
     return global[this.RESOURCE_KEY][@indexKey]?[key]
 
@@ -184,9 +194,9 @@ class ResourceUtils
 
   propertyFileToJSON: (fileData)->
     result = {}
-    lineArr = fileData.toString().split('\r\n')
+    lineArr = fileData.toString().split('\n')
     for line in lineArr
-      line = line.trim()
+      line = line.trim().replace(/\\r/g, '')
       if line[0] is "#" then continue
       if line.indexOf('=') is -1 then continue
 
